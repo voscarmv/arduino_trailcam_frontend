@@ -1,6 +1,7 @@
 // import logo from './logo.svg';
 // import './App.css';
 import { Login } from './components/login';
+import { Gallery } from './components/gallery';
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,14 +15,14 @@ function App() {
     {/* <b>Authkey: </b><i>{key.data}</i> */}
     <ul>
       <li><Link to="/login">Log in</Link></li>
-      {/* <li><Link to="/table">Tasks</Link></li>
-      <li><Link to="/new">New Task</Link></li> */}
+      <li><Link to="/gallery">Gallery</Link></li>
+      {/* <li><Link to="/new">New Task</Link></li> */}
     </ul>
     <Routes>
       <Route path="/" element={ <Login /> } />
       <Route path="/login" element={<Login />} />
-      {/* <Route path="/new" element={<New />} />
-      <Route path="/table" element={<Table />} />
+      <Route path="/gallery" element={<Gallery />} />
+      {/* <Route path="/table" element={<Table />} />
       <Route path="/form/:id" element={<Forms />} />  */}
     </Routes>
   </Router>
