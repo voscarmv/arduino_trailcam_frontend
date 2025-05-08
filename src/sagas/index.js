@@ -1,5 +1,5 @@
 import { all, call, put, takeEvery } from 'redux-saga/effects'
-import { fetchCreate, fetchRead, fetchUpdate, fetchDelete, fetchList } from './Api';
+import { fetchCreate, fetchRead, fetchUpdate, fetchDelete, fetchList } from './api';
 
 function* create(action){
   console.log(action);
