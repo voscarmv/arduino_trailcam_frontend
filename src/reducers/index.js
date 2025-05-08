@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { types } from '../constants/types';
+import { types } from '../actions/types';
 
 function login(state = {}, action) {
     switch (action.type) {
