@@ -8,7 +8,7 @@ const PICTURE_LOADING = "PICTURE_LOADING";
 const PICTURE_SUCCESS = "PICTURE_SUCCESS";
 const PICTURE_ERROR = "PICTURE_ERROR";
 
-export const types = {
+const types = {
     LOGIN_LOADING,
     LOGIN_SUCCESS,
     LOGIN_ERROR,
@@ -19,3 +19,5 @@ export const types = {
     PICTURE_SUCCESS,
     PICTURE_ERROR,
 };
+
+export default types;

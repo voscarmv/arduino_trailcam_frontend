@@ -1,11 +1,9 @@
 import fetch from 'node-fetch';
-import dotenv from 'dotenv';
 
-dotenv.config();
 const apiurl = process.env.APIURL;
 const loginurl = `${apiurl}/login`;
 
-export const login = async (request, url = loginurl) => {
+export const fetchLogin = async (request, url = loginurl) => {
     const response = await fetch(url, {
         method: 'POST', // Use POST or another HTTP method as needed
         headers: {
