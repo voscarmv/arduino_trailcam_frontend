@@ -1,5 +1,7 @@
-dotenv.config();
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const apiurl = process.env.APIURL;
 const loginurl = `${apiurl}/login`;
 
