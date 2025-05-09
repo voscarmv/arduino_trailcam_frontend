@@ -1,9 +1,11 @@
 import fetch from 'node-fetch';
 
-const apiurl = process.env.APIURL;
-const loginurl = `${apiurl}/login`;
+const apiurl = process.env.REACT_APP_APIURL;
+const loginurl = `${apiurl}/session`;
 
 export const fetchLogin = async (request, url = loginurl) => {
+    console.log(request);
+    console.log(url);
     const response = await fetch(url, {
         method: 'POST', // Use POST or another HTTP method as needed
         headers: {
@@ -12,6 +14,7 @@ export const fetchLogin = async (request, url = loginurl) => {
         // body: JSON.stringify({ user: { email_address: user, password: password }}) // Send the body as JSON
         body: JSON.stringify(request.data), // Send the body as JSON
       });
+      console.log('response');
     return await response.json();
 }
 

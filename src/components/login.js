@@ -29,12 +29,6 @@ const LoginForm = ({ handleLogin }) => {
             'ui:widget': 'password'
         }
     };
-    // const dispatch = useDispatch();
-    // const handleLogin = FormData => {
-    //     // dispatch(fetchLogin(FormData.formData.user, FormData.formData.pass));
-    //     console.log('nada');
-    //     console.log(FormData);
-    // };
     return (
         <Form schema={form} uiSchema={ui} validator={validator} onSubmit={handleLogin} />
     )

@@ -1,20 +1,16 @@
 import React from 'react';
-// import { useDispatch, useSelector } from 'react-redux';
-// import Form from '@rjsf/core';
-// import { read } from '../actions';
-// import { useMatch } from "react-router-dom";
+import { useDispatch } from 'react-redux';
 import LoginForm from '../components/login';
+import { login } from '../actions';
 
 const Login = () => {
-    // const route = useMatch('/read/:table/:id');
-    // const form = require('./forms/empty.json');
-    // const dispatch = useDispatch();
-    // const response = useSelector(state => state.response)
-    const handleSubmit = () => {
-        // dispatch(read({table: route.params.table, id: route.params.id}));
+    const dispatch = useDispatch();
+    const handleSubmit = form => {
+        console.log(form.formData);
+        dispatch(login({ data: { user: { email_address: form.formData.user, password: form.formData.pass } } }));
     };
     return (
-        <LoginForm handleSubmit={handleSubmit} />
+        <LoginForm handleLogin={handleSubmit} />
     );
 };
 
