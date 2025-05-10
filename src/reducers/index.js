@@ -22,6 +22,15 @@ function login(state = {}, action) {
     }
 };
 
+function notification(state={}, action){
+    switch (action.type) {
+        case types.NOTIFICATION:
+          return action.payload;
+        default:
+          return state;
+      }
+}
+
 function gallery(state = {}, action) {
     switch (action.type) {
         case types.GALLERY_LOADING:
@@ -66,6 +75,7 @@ function picture(state = {}, action) {
 
 export default combineReducers({
     loginStore: login,
+    notificationStore: notification,
     galleryStore: gallery,
     pictureStore: picture
 });

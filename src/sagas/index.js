@@ -2,15 +2,13 @@ import {
     all,
     call,
     put,
-    takeEvery
+    take,
+    takeEvery,
 } from 'redux-saga/effects'
+import { eventChannel, END } from 'redux-saga';
 import {
     fetchLogin,
-    fetchCreate,
-    fetchRead,
-    fetchUpdate,
-    fetchDelete,
-    fetchList
+    fetchConsumer,
 } from './api';
 import reducerTypes from '../reducers/types';
 import actionTypes from '../actions/types';
@@ -25,101 +23,71 @@ function* login(action) {
     }
 }
 
-function* create(action) {
-    console.log(action);
-    yield put({ type: 'LOADING' });
-    const url = `http://localhost:3000/${action.table}`;
-    const data = action.data;
-    try {
-        const response = yield call(fetchCreate, { url, data });
-        yield put({ type: 'SUCCESS', payload: JSON.stringify(response) })
-    } catch (e) {
-        yield put({ type: 'ERROR', error: e.message });
-    }
+const subscribe = (token) => {
+    const consumer = fetchConsumer(token);
+    return eventChannel(emit => {
+        const subscription = consumer.subscriptions.create(
+            { channel: "NotificationsChannel" },
+            {
+                connected() {
+                    console.log("Connected to NotificationsChannel.");
+                },
+                disconnected() {
+                    console.log("Disconnected from NotificationsChannel.");
+                    emit(END);
+                },
+                received(data) {
+                    console.log("Received:", data);
+                    emit({ type: reducerTypes.NOTIFICATION, payload: data });
+                },
+            }
+        );
+        return subscription;
+    });
 }
 
-function* read(action) {
-    console.log(action);
-    yield put({ type: 'LOADING' });
-    const url = `http://localhost:3000/${action.table}/${action.id}`;
-    try {
-        const response = yield call(fetchRead, { url });
-        yield put({ type: 'SUCCESS', payload: JSON.stringify(response) })
-    } catch (e) {
-        yield put({ type: 'ERROR', error: e.message });
+// Watches for LOGIN_SUCCESS and starts the WebSocket subscription
+function* watchLoginSuccess() {
+    while (true) {
+      const action = yield take(reducerTypes.LOGIN_SUCCESS);
+      const token = JSON.parse(action.payload).data.token; // Adjust based on your response structure
+      yield call(handleWebSocketSubscription, token);
     }
-}
+  }
+  
+  // Handles the WebSocket subscription
+  function* handleWebSocketSubscription(token) {
+    const channel = yield call(subscribe, token);
+    try {
+      while (true) {
+        const action = yield take(channel);
+        yield put(action);
+      }
+    } finally {
+      channel.close();
+    }
+  }
 
-function* update(action) {
-    console.log(action);
-    yield put({ type: 'LOADING' });
-    const url = `http://localhost:3000/${action.table}/${action.id}`;
-    const data = action.data;
-    try {
-        const response = yield call(fetchUpdate, { url, data });
-        yield put({ type: 'SUCCESS', payload: JSON.stringify(response) })
-    } catch (e) {
-        yield put({ type: 'ERROR', error: e.message });
-    }
-}
-
-function* deleter(action) {
-    console.log(action);
-    yield put({ type: 'LOADING' });
-    const url = `http://localhost:3000/${action.table}/${action.id}`;
-    try {
-        const response = yield call(fetchDelete, { url });
-        yield put({ type: 'SUCCESS', payload: JSON.stringify(response) })
-    } catch (e) {
-        yield put({ type: 'ERROR', error: e.message });
-    }
-}
-
-function* list(action) {
-    yield put({ type: 'LOADING' });
-    const url = `http://localhost:3000/${action.table}`;
-    try {
-        let response = yield call(fetchList, { url });
-        response = JSON.stringify(response);
-        console.log(response);
-        yield put({ type: 'SUCCESS', payload: response })
-    } catch (e) {
-        yield put({ type: 'ERROR', error: e.message });
-    }
-}
+// function* callCreateBlockChannel(token) {
+//     const blockChannel = yield call(subscribe, token);
+//     try {
+//         while (true) {
+//             var event = yield take(blockChannel)
+//             yield put(event)
+//         }
+//     } finally {
+//         blockChannel.close()
+//     }
+// }
 
 export function* watchLogin() {
     yield takeEvery(actionTypes.LOGIN, login);
-}
-
-export function* watchCreate() {
-    yield takeEvery('CREATE', create);
-}
-
-export function* watchRead() {
-    yield takeEvery('READ', read);
-}
-
-export function* watchUpdate() {
-    yield takeEvery('UPDATE', update);
-}
-
-export function* watchDelete() {
-    yield takeEvery('DELETE', deleter);
-}
-
-export function* watchList() {
-    yield takeEvery('LIST', list);
 }
 
 // single entry point to start all Sagas at once
 export default function* rootSaga() {
     yield all([
         call(watchLogin),
-        call(watchCreate),
-        call(watchRead),
-        call(watchUpdate),
-        call(watchDelete),
-        call(watchList),
+        call(watchLoginSuccess),
     ])
 }

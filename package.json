@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@rails/actioncable": "^8.0.200",
     "@reduxjs/toolkit": "^2.7.0",
     "@rjsf/core": "^5.24.10",
     "@rjsf/utils": "^5.24.10",
