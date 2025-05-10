@@ -12,9 +12,8 @@ export const fetchLogin = async (request, url = loginurl) => {
           'Content-Type': 'application/json', // Set the content type
         },
         // body: JSON.stringify({ user: { email_address: user, password: password }}) // Send the body as JSON
-        body: JSON.stringify(request.data), // Send the body as JSON
+        body: JSON.stringify(request), // Send the body as JSON
       });
-      console.log('response');
     return await response.json();
 }
 
