@@ -24,10 +24,10 @@ function* login(action) {
     }
 }
 
-function* regenToken(token) {
+function* regenToken(action) {
     yield put({ type: reducerTypes.REGENTOKEN_LOADING });
     try {
-      const response = yield call(fetchRegenToken, token);
+      const response = yield call(fetchRegenToken, action.data);
       yield put({ type: reducerTypes.REGENTOKEN_SUCCESS, payload: JSON.stringify(response) });
     } catch (e) {
       yield put({ type: reducerTypes.REGENTOKEN_ERROR, error: e.message });
@@ -63,7 +63,7 @@ function* watchLoginSuccess() {
       const action = yield take(reducerTypes.LOGIN_SUCCESS);
       const token = JSON.parse(action.payload).data.token; // Adjust based on your response structure
       yield call(handleWebSocketSubscription, token);
-      yield put({ type: actionTypes.REGENTOKEN, token }); // Regenerate token for better security
+      yield put({ type: actionTypes.REGENTOKEN, data: token }); // Regenerate token for better security
     }
   }
   
