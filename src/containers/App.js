@@ -10,9 +10,11 @@ import { useSelector } from 'react-redux';
 
 function App() {
     const key = useSelector(state => state.loginStore);
+    const notifications = useSelector(state => state.notificationStore);
     return (
         <Router>
-            <b>Authkey: </b><i>{key.data}</i>
+            <b>Authkey: </b><i>{key.data}</i><br></br>
+            <b>Notifications:</b><i>{notifications.data}</i>
             <ul>
                 <li><Link to="/login">Log in</Link></li>
                 <li><Link to="/gallery">Gallery</Link></li>

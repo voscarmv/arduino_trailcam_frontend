@@ -39,7 +39,7 @@ function login(state = {}, action) {
 function notification(state = {}, action) {
     switch (action.type) {
         case types.NOTIFICATION:
-            return action.payload;
+            return { data: action.payload };
         default:
             return state;
     }

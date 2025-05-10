@@ -18,7 +18,13 @@ function* login(action) {
     yield put({ type: reducerTypes.LOGIN_LOADING });
     try {
         const response = yield call(fetchLogin, action.data);
-        yield put({ type: reducerTypes.LOGIN_SUCCESS, payload: JSON.stringify(response) });
+        yield put({
+            type: reducerTypes.LOGIN_SUCCESS,
+            payload: JSON.stringify(response)
+        });
+        const token = response.data.token;
+        yield call(handleWebSocketSubscription, token);
+        yield call(regenToken, token); // Regenerate token for better security
     } catch (e) {
         yield put({ type: reducerTypes.LOGIN_ERROR, error: e.message });
     }
@@ -27,12 +33,15 @@ function* login(action) {
 function* regenToken(action) {
     yield put({ type: reducerTypes.REGENTOKEN_LOADING });
     try {
-      const response = yield call(fetchRegenToken, action.data);
-      yield put({ type: reducerTypes.REGENTOKEN_SUCCESS, payload: JSON.stringify(response) });
+        const response = yield call(fetchRegenToken, action.data);
+        yield put({
+            type: reducerTypes.REGENTOKEN_SUCCESS,
+            payload: JSON.stringify(response)
+        });
     } catch (e) {
-      yield put({ type: reducerTypes.REGENTOKEN_ERROR, error: e.message });
+        yield put({ type: reducerTypes.REGENTOKEN_ERROR, error: e.message });
     }
-  }
+}
 
 const subscribe = (token) => {
     const consumer = fetchConsumer(token);
@@ -49,36 +58,44 @@ const subscribe = (token) => {
                 },
                 received(data) {
                     console.log("Received:", data);
-                    emit({ type: reducerTypes.NOTIFICATION, payload: data });
+                    emit({
+                        type: reducerTypes.NOTIFICATION,
+                        payload: JSON.stringify(data)
+                    });
                 },
             }
         );
-        return subscription;
+        // Return an unsubscribe function
+        return () => {
+            console.log("Unsubscribing from NotificationsChannel.");
+            subscription.unsubscribe();
+        };
     });
 }
 
 // Watches for LOGIN_SUCCESS and starts the WebSocket subscription
-function* watchLoginSuccess() {
-    while (true) {
-      const action = yield take(reducerTypes.LOGIN_SUCCESS);
-      const token = JSON.parse(action.payload).data.token; // Adjust based on your response structure
-      yield call(handleWebSocketSubscription, token);
-      yield put({ type: actionTypes.REGENTOKEN, data: token }); // Regenerate token for better security
-    }
-  }
-  
-  // Handles the WebSocket subscription
-  function* handleWebSocketSubscription(token) {
+// function* watchLoginSuccess() {
+//     while (true) {
+//         const action = yield take(reducerTypes.LOGIN_SUCCESS);
+//         const token = JSON.parse(action.payload).data.token; // Adjust based on your response structure
+//         yield call(handleWebSocketSubscription, token);
+//         yield call(regenToken, token); // Regenerate token for better security
+//     }
+// }
+
+// Handles the WebSocket subscription
+function* handleWebSocketSubscription(token) {
     const channel = yield call(subscribe, token);
     try {
-      while (true) {
-        const action = yield take(channel);
-        yield put(action);
-      }
+        while (true) {
+            const action = yield take(channel);
+            yield call(console.log, action);
+            yield put(action);
+        }
     } finally {
-      channel.close();
+        channel.close();
     }
-  }
+}
 
 // function* callCreateBlockChannel(token) {
 //     const blockChannel = yield call(subscribe, token);
@@ -104,7 +121,7 @@ export function* watchRegenToken() {
 export default function* rootSaga() {
     yield all([
         call(watchLogin),
-        call(watchLoginSuccess),
+        // call(watchLoginSuccess),
         call(watchRegenToken)
     ])
 }
