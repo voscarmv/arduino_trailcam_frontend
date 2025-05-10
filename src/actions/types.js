@@ -1,13 +1,13 @@
 const LOGIN = "LOGIN";
 const GALLERY = "GALLERY";
 const PICTURE = "PICTURE";
-// const NOTIFICATION = "NOTIFICATION";
+const REGENTOKEN = "REGENTOKEN";
 
 const types = {
     LOGIN,
     GALLERY,
     PICTURE,
-    // NOTIFICATION,
+    REGENTOKEN,
 };
 
 export default types;

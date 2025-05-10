@@ -5,10 +5,10 @@ export const login = (record) => ({
     data: record.data,
 })
 
-export const notification = (record) => ({
-    type: types.NOTIFICATION,
-    data: record.data,
-})
+// export const notification = (record) => ({
+//     type: types.NOTIFICATION,
+//     data: record.data,
+// })
 
 export const create = (record) => ({
     type: types.CREATE,

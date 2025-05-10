@@ -8,6 +8,7 @@ import {
 import { eventChannel, END } from 'redux-saga';
 import {
     fetchLogin,
+    fetchRegenToken,
     fetchConsumer,
 } from './api';
 import reducerTypes from '../reducers/types';
@@ -22,6 +23,16 @@ function* login(action) {
         yield put({ type: reducerTypes.LOGIN_ERROR, error: e.message });
     }
 }
+
+function* regenToken(token) {
+    yield put({ type: reducerTypes.REGENTOKEN_LOADING });
+    try {
+      const response = yield call(fetchRegenToken, token);
+      yield put({ type: reducerTypes.REGENTOKEN_SUCCESS, payload: JSON.stringify(response) });
+    } catch (e) {
+      yield put({ type: reducerTypes.REGENTOKEN_ERROR, error: e.message });
+    }
+  }
 
 const subscribe = (token) => {
     const consumer = fetchConsumer(token);
@@ -52,6 +63,7 @@ function* watchLoginSuccess() {
       const action = yield take(reducerTypes.LOGIN_SUCCESS);
       const token = JSON.parse(action.payload).data.token; // Adjust based on your response structure
       yield call(handleWebSocketSubscription, token);
+      yield put({ type: actionTypes.REGENTOKEN, token }); // Regenerate token for better security
     }
   }
   
@@ -82,6 +94,10 @@ function* watchLoginSuccess() {
 
 export function* watchLogin() {
     yield takeEvery(actionTypes.LOGIN, login);
+}
+
+export function* watchRegenToken() {
+    yield takeEvery(actionTypes.REGENTOKEN, regenToken);
 }
 
 // single entry point to start all Sagas at once

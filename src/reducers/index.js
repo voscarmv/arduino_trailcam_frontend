@@ -17,18 +17,32 @@ function login(state = {}, action) {
                 loading: false,
                 error: action.error
             };
+        case types.REGENTOKEN_LOADING:
+            return {
+                loading: true,
+            };
+        case types.REGENTOKEN_SUCCESS:
+            return {
+                loading: false,
+                data: action.payload
+            };
+        case types.REGENTOKEN_ERROR:
+            return {
+                loading: false,
+                error: action.error
+            };
         default:
             return state;
     }
 };
 
-function notification(state={}, action){
+function notification(state = {}, action) {
     switch (action.type) {
         case types.NOTIFICATION:
-          return action.payload;
+            return action.payload;
         default:
-          return state;
-      }
+            return state;
+    }
 }
 
 function gallery(state = {}, action) {
