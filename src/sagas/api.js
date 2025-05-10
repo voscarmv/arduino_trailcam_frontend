@@ -7,12 +7,11 @@ export const fetchLogin = async (request, url = loginurl) => {
     console.log(request);
     console.log(url);
     const response = await fetch(url, {
-        method: 'POST', // Use POST or another HTTP method as needed
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Set the content type
+          'Content-Type': 'application/json',
         },
-        // body: JSON.stringify({ user: { email_address: user, password: password }}) // Send the body as JSON
-        body: JSON.stringify(request), // Send the body as JSON
+        body: JSON.stringify(request),
       });
     return await response.json();
 }

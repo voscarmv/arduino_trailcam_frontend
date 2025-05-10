@@ -16,11 +16,9 @@ import reducerTypes from '../reducers/types';
 import actionTypes from '../actions/types';
 
 function* login(action) {
-    console.log(action);
     yield put({ type: reducerTypes.LOGIN_LOADING });
     try {
         const response = yield call(fetchLogin, action.data);
-        yield call(console.log, response);
         yield put({ type: reducerTypes.LOGIN_SUCCESS, payload: JSON.stringify(response) });
     } catch (e) {
         yield put({ type: reducerTypes.LOGIN_ERROR, error: e.message });
