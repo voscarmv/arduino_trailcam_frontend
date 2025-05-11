@@ -1,6 +1,7 @@
 import {
     all,
     call,
+    fork,
     put,
     take,
     takeEvery,
@@ -17,23 +18,24 @@ import actionTypes from '../actions/types';
 function* login(action) {
     yield put({ type: reducerTypes.LOGIN_LOADING });
     try {
-        const response = yield call(fetchLogin, action.data);
+        const response = yield call(fetchLogin, { body: action.data });
         yield put({
             type: reducerTypes.LOGIN_SUCCESS,
             payload: JSON.stringify(response)
         });
         const token = response.data.token;
-        yield call(handleWebSocketSubscription, token);
+        yield fork(handleWebSocketSubscription, token);
+        // yield call(console.log('regen1'));
         yield call(regenToken, token); // Regenerate token for better security
     } catch (e) {
         yield put({ type: reducerTypes.LOGIN_ERROR, error: e.message });
     }
 }
 
-function* regenToken(action) {
+function* regenToken(token) {
     yield put({ type: reducerTypes.REGENTOKEN_LOADING });
     try {
-        const response = yield call(fetchRegenToken, action.data);
+        const response = yield call(fetchRegenToken, { token: token });
         yield put({
             type: reducerTypes.REGENTOKEN_SUCCESS,
             payload: JSON.stringify(response)
@@ -65,7 +67,6 @@ const subscribe = (token) => {
                 },
             }
         );
-        // Return an unsubscribe function
         return () => {
             console.log("Unsubscribing from NotificationsChannel.");
             subscription.unsubscribe();
@@ -73,17 +74,6 @@ const subscribe = (token) => {
     });
 }
 
-// Watches for LOGIN_SUCCESS and starts the WebSocket subscription
-// function* watchLoginSuccess() {
-//     while (true) {
-//         const action = yield take(reducerTypes.LOGIN_SUCCESS);
-//         const token = JSON.parse(action.payload).data.token; // Adjust based on your response structure
-//         yield call(handleWebSocketSubscription, token);
-//         yield call(regenToken, token); // Regenerate token for better security
-//     }
-// }
-
-// Handles the WebSocket subscription
 function* handleWebSocketSubscription(token) {
     const channel = yield call(subscribe, token);
     try {
@@ -97,18 +87,6 @@ function* handleWebSocketSubscription(token) {
     }
 }
 
-// function* callCreateBlockChannel(token) {
-//     const blockChannel = yield call(subscribe, token);
-//     try {
-//         while (true) {
-//             var event = yield take(blockChannel)
-//             yield put(event)
-//         }
-//     } finally {
-//         blockChannel.close()
-//     }
-// }
-
 export function* watchLogin() {
     yield takeEvery(actionTypes.LOGIN, login);
 }
@@ -117,11 +95,9 @@ export function* watchRegenToken() {
     yield takeEvery(actionTypes.REGENTOKEN, regenToken);
 }
 
-// single entry point to start all Sagas at once
 export default function* rootSaga() {
     yield all([
         call(watchLogin),
-        // call(watchLoginSuccess),
         call(watchRegenToken)
     ])
 }
