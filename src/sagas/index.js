@@ -19,10 +19,10 @@ function* login(action) {
     yield put({ type: reducerTypes.LOGIN_LOADING });
     try {
         const response = yield call(fetchLogin, { body: action.data });
-        yield put({
-            type: reducerTypes.LOGIN_SUCCESS,
-            payload: JSON.stringify(response)
-        });
+        // yield put({
+        //     type: reducerTypes.LOGIN_SUCCESS,
+        //     payload: JSON.stringify(response)
+        // });
         const token = response.data.token;
         yield fork(handleWebSocketSubscription, token);
         // yield call(console.log('regen1'));
