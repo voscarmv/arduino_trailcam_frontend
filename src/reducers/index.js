@@ -66,7 +66,7 @@ function gallery(state = {}, action) {
         case types.GALLERY_SUCCESS:
             return {
                 loading: false,
-                data: action.payload
+                data: JSON.parse(action.payload)
             };
         case types.GALLERY_ERROR:
             return {

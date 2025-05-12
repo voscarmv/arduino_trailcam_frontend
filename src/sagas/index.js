@@ -19,7 +19,7 @@ import actionTypes from '../actions/types';
 function* login(action) {
     yield put({ type: reducerTypes.LOGIN_LOADING });
     try {
-        const response = yield call(fetchLogin, { body: action.data });
+        const response = yield call(fetchLogin, action);
         const token = response.body.data.token;
         yield fork(actionCableSubscribe, token);
         yield call(regenToken, token); // Regenerate token for better security
@@ -35,7 +35,7 @@ function getToken(headers) {
 function* regenToken(token) {
     yield put({ type: reducerTypes.REGENTOKEN_LOADING });
     try {
-        const response = yield call(fetchRegenToken, { token: token });
+        const response = yield call(fetchRegenToken, { data: { token: token } });
         yield put({
             type: reducerTypes.REGENTOKEN_SUCCESS,
             payload: getToken(response.headers)
@@ -56,10 +56,10 @@ function* newToken(token) {
 function* gallery(action) {
     yield put({ type: reducerTypes.GALLERY_LOADING });
     try {
-        const response = yield call(fetchAllPictures(action));
+        const response = yield call(fetchAllPictures, action);
         yield put({
             type: reducerTypes.GALLERY_SUCCESS,
-            payload: JSON.stringify(response.body)
+            payload: JSON.stringify(response.body.data)
         });
         yield call(newToken, getToken(response.headers));
     } catch (e) {

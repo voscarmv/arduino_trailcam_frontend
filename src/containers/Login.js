@@ -5,20 +5,22 @@ import { login } from '../actions';
 
 const Login = () => {
     const dispatch = useDispatch();
-    const handleSubmit = form => {
+    const handleLogin = form => {
         dispatch(
             login({
                 data: {
-                    user: {
-                        email_address: form.formData.user,
-                        password: form.formData.pass
+                    body: {
+                        user: {
+                            email_address: form.formData.user,
+                            password: form.formData.pass
+                        }
                     }
                 }
             })
         );
     };
     return (
-        <LoginForm handleLogin={handleSubmit} />
+        <LoginForm handleLogin={handleLogin} />
     );
 };
 

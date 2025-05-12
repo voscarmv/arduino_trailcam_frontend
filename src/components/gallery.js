@@ -1,19 +1,25 @@
-// import Form from '@rjsf/core';
-// import validator from '@rjsf/validator-ajv8';
+import propTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
-// import { RJSFSchema } from '@rjsf/utils';
-// import { useDispatch } from 'react-redux';
-// import { fetchLogin } from '../actions';
-
-export const Gallery = () => {
-    // const form = {
-    // };
-    // const ui = {
-    // };
-    // // const dispatch = useDispatch();
-    // const handlePagination = FormData => {
-    // };
-    return(
-        <p> Prev, Next </p>
+const Gallery = ({ table, handleClick }) => {
+    return (
+        <ul>
+            {
+                table.map(
+                    item => (
+                        <li>
+                            <Link to={`/`} onClick={(event) => handleClick(item.id, item.url, event)}>View</Link> {JSON.stringify(item)}
+                        </li>
+                    )
+                )
+            }
+        </ul>
     )
 };
+
+Gallery.propTypes = {
+    table: propTypes.array.isRequired,
+    handleClick: propTypes.func.isRequired,
+};
+
+export default Gallery;

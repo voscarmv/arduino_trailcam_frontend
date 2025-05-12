@@ -45,22 +45,22 @@ const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
     }
 }
 
-export const fetchLogin = async (request, url = loginurl) => {
-    return fetchRequest(url, 'POST', null, JSON.stringify(request.body));
+export const fetchLogin = async (action, url = loginurl) => {
+    return fetchRequest(url, 'POST', null, JSON.stringify(action.data.body));
 }
 
 export const fetchConsumer = (token, url = wsurl) => {
     return createConsumer(`${url}/cable?token=${token}`);
 }
 
-export const fetchRegenToken = async (request, url = loginurl) => {
-    return fetchRequest(url, 'PUT', request.token);
+export const fetchRegenToken = async (action, url = loginurl) => {
+    return fetchRequest(url, 'PUT', action.data.token);
 }
 
-export const fetchAllPictures = async (request, url = picsurl) => {
-    return fetchRequest(url, 'GET', request.token);
+export const fetchAllPictures = async (action, url = picsurl) => {
+    return fetchRequest(url, 'GET', action.data.token);
 }
 
-export const fetchViewPicture = async (request, url = picsurl) => {
-    return fetchRequest(url, 'PUT', request.token, request.body);
+export const fetchViewPicture = async (action, url = picsurl) => {
+    return fetchRequest(url, 'PUT', action.data.token, action.data.body);
 }
