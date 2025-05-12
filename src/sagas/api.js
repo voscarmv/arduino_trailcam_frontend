@@ -9,36 +9,41 @@ const picsurl = `${apiurl}/photos`;
 const fetchWrap = async (url, method = 'GET', token = null, body = null) => {
     const headers = { 'Content-Type': 'application/json' };
     if (token) { headers['Authorization'] = `Bearer ${token}`; }
+    if (body) {
+        return fetch(url, {
+            method: method,
+            headers: headers,
+            body: body
+        });
+    } else {
+        return fetch(url, {
+            method: method,
+            headers: headers,
+        });
+    }
+}
+
+const checkJsonError = (response, json) => {
+    if (!response.ok || json.success === false) {
+        const errorMessage = json.message || `HTTP ${response.status}`;
+        const errorDetails = json.errors || {};
+        throw new Error(`${errorMessage}: ${JSON.stringify(errorDetails)}`);
+    }
+}
+
+const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
     try {
-        let response;
-        if (body) {
-            response = fetch(url, {
-                method: method,
-                headers: headers,
-                body: body
-            });
-        } else {
-            response = fetch(url, {
-                method: method,
-                headers: headers,
-            });
-        }
-        const json = await response.json();
-        // If response is not OK or the API reports success: false
-        if (!response.ok || json.success === false) {
-            const errorMessage = json.message || `HTTP ${response.status}`;
-            const errorDetails = json.errors || {};
-            throw new Error(`${errorMessage}: ${JSON.stringify(errorDetails)}`);
-        }
-        return response;
+        const response = await fetchWrap(url, method, token, body);
+        const json = response.json();
+        checkJsonError(response, json);
+        return json;
     } catch (e) {
         throw e;
     }
 }
 
 export const fetchLogin = async (request, url = loginurl) => {
-    const response = await fetchWrap(url, 'POST', null, JSON.stringify(request.body));
-    return await response.json();
+    return fetchRequest(url, 'POST', null, JSON.stringify(request.body));
 }
 
 export const fetchConsumer = (token, url = wsurl) => {
@@ -46,25 +51,13 @@ export const fetchConsumer = (token, url = wsurl) => {
 }
 
 export const fetchRegenToken = async (request, url = loginurl) => {
-    const response = await fetchWrap(url, 'PUT', request.token);
-    return {
-        headers: response.headers,
-        body: await response.json()
-    };
+    return fetchRequest(url, 'PUT', request.token);
 }
 
 export const fetchAllPictures = async (request, url = picsurl) => {
-    const response = await fetchWrap(url, 'GET', request.token);
-    return {
-        headers: response.headers,
-        body: await response.json()
-    };
+    return fetchRequest(url, 'GET', request.token);
 }
 
 export const fetchViewPicture = async (request, url = picsurl) => {
-    const response = await fetchWrap(url, 'PUT', request.token, request.body);
-    return {
-        headers: response.headers,
-        body: await response.json()
-    };
+    return fetchRequest(url, 'PUT', request.token, request.body);
 }
