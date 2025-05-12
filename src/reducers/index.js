@@ -38,8 +38,20 @@ function login(state = {}, action) {
 
 function notification(state = {}, action) {
     switch (action.type) {
-        case types.NOTIFICATION:
-            return { data: action.payload };
+        case types.NOTIFICATION_LOADING:
+            return {
+                loading: true,
+            };
+        case types.NOTIFICATION_SUCCESS:
+            return {
+                loading: false,
+                data: action.payload
+            };
+        case types.NOTIFICATION_ERROR:
+            return {
+                loading: false,
+                error: action.error
+            };
         default:
             return state;
     }

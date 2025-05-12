@@ -28,7 +28,7 @@ function* login(action) {
     }
 }
 
-function getToken(headers){
+function getToken(headers) {
     return headers.get('Authorization').split(' ')[1]
 }
 
@@ -58,8 +58,8 @@ function* newToken(token) {
 }
 
 function* gallery(action) {
-    yield put({type:reducerTypes.GALLERY_LOADING});
-    try{
+    yield put({ type: reducerTypes.GALLERY_LOADING });
+    try {
         const response = yield call(fetchAllPictures(action));
         yield put({
             type: reducerTypes.GALLERY_SUCCESS,
@@ -87,7 +87,7 @@ const subscribe = (token) => {
                 received(data) {
                     console.log("Received:", data);
                     emit({
-                        type: reducerTypes.NOTIFICATION,
+                        type: reducerTypes.NOTIFICATION_SUCCESS,
                         payload: JSON.stringify(data)
                     });
                 },
@@ -101,13 +101,16 @@ const subscribe = (token) => {
 }
 
 function* actionCableSubscribe(token) {
-    const channel = yield call(subscribe, token);
+    yield put({ type: reducerTypes.NOTIFICATION_LOADING });
+    let channel;
     try {
+        channel = yield call(subscribe, token);
         while (true) {
             const action = yield take(channel);
-            yield call(console.log, action);
             yield put(action);
         }
+    } catch (e) {
+        yield put({ type: reducerTypes.NOTIFICATION_ERROR, error: e.message });
     } finally {
         channel.close();
     }
