@@ -47,14 +47,10 @@ function* regenToken(token) {
 
 function* newToken(token) {
     yield put({ type: reducerTypes.REGENTOKEN_LOADING });
-    try {
-        yield put({
-            type: reducerTypes.REGENTOKEN_SUCCESS,
-            payload: token
-        });
-    } catch (e) {
-        yield put({ type: reducerTypes.REGENTOKEN_ERROR, error: e.message });
-    }
+    yield put({
+        type: reducerTypes.REGENTOKEN_SUCCESS,
+        payload: token
+    });
 }
 
 function* gallery(action) {
@@ -78,14 +74,19 @@ const subscribe = (token) => {
             { channel: "NotificationsChannel" },
             {
                 connected() {
-                    console.log("Connected to NotificationsChannel.");
+                    emit({
+                        type: reducerTypes.NOTIFICATION_SUCCESS,
+                        payload: 'Connected to NotificationsChannel'
+                    });
                 },
                 disconnected() {
-                    console.log("Disconnected from NotificationsChannel.");
+                    emit({
+                        type: reducerTypes.NOTIFICATION_SUCCESS,
+                        payload: 'Disconnected from NotificationsChannel'
+                    });
                     emit(END);
                 },
                 received(data) {
-                    console.log("Received:", data);
                     emit({
                         type: reducerTypes.NOTIFICATION_SUCCESS,
                         payload: JSON.stringify(data)
@@ -94,7 +95,6 @@ const subscribe = (token) => {
             }
         );
         return () => {
-            console.log("Unsubscribing from NotificationsChannel.");
             subscription.unsubscribe();
         };
     });
@@ -112,7 +112,7 @@ function* actionCableSubscribe(token) {
     } catch (e) {
         yield put({ type: reducerTypes.NOTIFICATION_ERROR, error: e.message });
     } finally {
-        channel.close();
+        if (channel) channel.close();
     }
 }
 
