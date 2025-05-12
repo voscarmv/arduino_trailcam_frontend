@@ -9,7 +9,8 @@ export const GalleryMenu = () => {
     const dispatch = useDispatch();
     useEffect(
         () => {
-            dispatch(gallery({ data: { token: token.data } }));
+            dispatch(gallery({ data: { token: token.data } })); // Correct
+            // dispatch(gallery({ data: { token: token.data } })); // Incorrect for testing
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         []
