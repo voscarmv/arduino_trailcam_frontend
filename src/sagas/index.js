@@ -12,6 +12,7 @@ import {
     fetchRegenToken,
     fetchConsumer,
     fetchAllPictures,
+    fetchViewPicture,
 } from './api';
 import reducerTypes from '../reducers/types';
 import actionTypes from '../actions/types';
@@ -63,6 +64,20 @@ function* gallery(action) {
         });
         yield call(newToken, getToken(response.headers));
     } catch (e) {
+        yield put({ type: reducerTypes.GALLERY_ERROR, error: e.message });
+    }
+}
+
+function* picture(action) {
+    yield put({type: reducerTypes.PICTURE_LOADING});
+    try{
+        const response = yield call(fetchViewPicture, action);
+        yield put({
+            type: reducerTypes.PICTURE_SUCCESS,
+            payload: JSON.stringify(response.body.data)
+        });
+        yield call(newToken, getToken(response.headers));
+    } catch(e) {
         yield put({ type: reducerTypes.GALLERY_ERROR, error: e.message });
     }
 }
@@ -132,9 +147,14 @@ export function* watchGallery() {
     yield takeEvery(actionTypes.GALLERY, gallery);
 }
 
+export function* watchPicture() {
+    yield takeEvery(actionTypes.PICTURE, picture);
+}
+
 export default function* rootSaga() {
     yield all([
         call(watchLogin),
-        call(watchGallery)
-    ])
+        call(watchGallery),
+        call(watchPicture)
+    ]);
 }
