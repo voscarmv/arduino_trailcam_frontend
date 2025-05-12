@@ -20,7 +20,7 @@ function* login(action) {
     yield put({ type: reducerTypes.LOGIN_LOADING });
     try {
         const response = yield call(fetchLogin, { body: action.data });
-        const token = response.data.token;
+        const token = response.body.data.token;
         yield fork(actionCableSubscribe, token);
         yield call(regenToken, token); // Regenerate token for better security
     } catch (e) {

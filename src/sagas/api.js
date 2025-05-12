@@ -34,11 +34,14 @@ const checkJsonError = (response, json) => {
 const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
     try {
         const response = await fetchWrap(url, method, token, body);
-        const json = response.json();
+        const json = await response.json();
         checkJsonError(response, json);
-        return json;
+        return {
+            headers: response.headers,
+            body: json
+        };
     } catch (e) {
-        throw e;
+        throw new Error(`Fetch error [${method} ${url}]: ` + e.message);
     }
 }
 
