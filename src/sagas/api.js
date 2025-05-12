@@ -34,15 +34,24 @@ export const fetchConsumer = (token, url = wsurl) => {
 
 export const fetchRegenToken = async (request, url = loginurl) => {
     const response = await fetchWrap(url, 'PUT', request.token);
-    return await response.json();
+    return {
+        headers: response.headers,
+        body: await response.json()
+    };
 }
 
 export const fetchAllPictures = async (request, url = picsurl) => {
     const response = await fetchWrap(url, 'GET', request.token);
-    return await response.json();
+    return {
+        headers:  response.headers,
+        body: await response.json()
+    };
 }
 
 export const fetchViewPicture = async (request, url = picsurl) => {
     const response = await fetchWrap(url, 'PUT', request.token, request.body);
-    return await response.json();
+    return {
+        headers:  response.headers,
+        body: await response.json()
+    };
 }

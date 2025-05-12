@@ -11,6 +11,7 @@ import {
     fetchLogin,
     fetchRegenToken,
     fetchConsumer,
+    fetchAllPictures,
 } from './api';
 import reducerTypes from '../reducers/types';
 import actionTypes from '../actions/types';
@@ -19,17 +20,16 @@ function* login(action) {
     yield put({ type: reducerTypes.LOGIN_LOADING });
     try {
         const response = yield call(fetchLogin, { body: action.data });
-        // yield put({
-        //     type: reducerTypes.LOGIN_SUCCESS,
-        //     payload: JSON.stringify(response)
-        // });
         const token = response.data.token;
         yield fork(handleWebSocketSubscription, token);
-        // yield call(console.log('regen1'));
         yield call(regenToken, token); // Regenerate token for better security
     } catch (e) {
         yield put({ type: reducerTypes.LOGIN_ERROR, error: e.message });
     }
+}
+
+function getToken(headers){
+    return headers.get('Authorization').split(' ')[1]
 }
 
 function* regenToken(token) {
@@ -38,10 +38,36 @@ function* regenToken(token) {
         const response = yield call(fetchRegenToken, { token: token });
         yield put({
             type: reducerTypes.REGENTOKEN_SUCCESS,
-            payload: JSON.stringify(response)
+            payload: getToken(response.headers)
         });
     } catch (e) {
         yield put({ type: reducerTypes.REGENTOKEN_ERROR, error: e.message });
+    }
+}
+
+function* newToken(token) {
+    yield put({ type: reducerTypes.REGENTOKEN_LOADING });
+    try {
+        yield put({
+            type: reducerTypes.REGENTOKEN_SUCCESS,
+            payload: token
+        });
+    } catch (e) {
+        yield put({ type: reducerTypes.REGENTOKEN_ERROR, error: e.message });
+    }
+}
+
+function* gallery(action) {
+    yield put({type:reducerTypes.GALLERY_LOADING});
+    try{
+        const response = yield call(fetchAllPictures(action));
+        yield put({
+            type: reducerTypes.GALLERY_SUCCESS,
+            payload: JSON.stringify(response.body)
+        });
+        yield call(newToken, getToken(response.headers));
+    } catch (e) {
+        yield put({ type: reducerTypes.GALLERY_ERROR, error: e.message });
     }
 }
 
@@ -95,9 +121,17 @@ export function* watchRegenToken() {
     yield takeEvery(actionTypes.REGENTOKEN, regenToken);
 }
 
+export function* watchNewToken() {
+    yield takeEvery(actionTypes.NEWTOKEN, newToken);
+}
+
+export function* watchGallery() {
+    yield takeEvery(actionTypes.GALLERY, gallery);
+}
+
 export default function* rootSaga() {
     yield all([
         call(watchLogin),
-        call(watchRegenToken)
+        call(watchGallery)
     ])
 }
