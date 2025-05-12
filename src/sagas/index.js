@@ -74,11 +74,14 @@ function* picture(action) {
         const response = yield call(fetchViewPicture, action);
         yield put({
             type: reducerTypes.PICTURE_SUCCESS,
-            payload: JSON.stringify(response.body.data)
+            payload: {
+                imgurl: action.data.imgurl,
+                response: response.body.data
+            }
         });
         yield call(newToken, getToken(response.headers));
     } catch(e) {
-        yield put({ type: reducerTypes.GALLERY_ERROR, error: e.message });
+        yield put({ type: reducerTypes.PICTURE_ERROR, error: e.message });
     }
 }
 

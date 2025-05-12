@@ -9,3 +9,8 @@ export const gallery = (record) => ({
     type: types.GALLERY,
     data: record.data
 })
+
+export const picture = (record) => ({
+    type: types.PICTURE,
+    data: record.data
+})

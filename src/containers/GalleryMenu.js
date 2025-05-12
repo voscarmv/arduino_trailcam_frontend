@@ -1,11 +1,13 @@
 import Gallery from '../components/gallery';
-import { gallery } from '../actions';
+import Picture from '../components/picture';
+import { gallery, picture } from '../actions';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 
 export const GalleryMenu = () => {
     const token = useSelector(state => state.loginStore);
     const photos = useSelector(state => state.galleryStore);
+    const pic = useSelector(state => state.pictureStore);
     const dispatch = useDispatch();
     useEffect(
         () => {
@@ -15,18 +17,24 @@ export const GalleryMenu = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         []
     );
-    const handleClick = (id, url, event) => {
+    const handleClick = (key, imgurl, event) => {
         event.preventDefault();
-        console.log("Display and mark as viewed:", id, url);
-        console.log(photos);
+        dispatch(picture({
+            data: {
+                id: key,
+                token: token.data,
+                body: {
+                    viewed: true
+                },
+                imgurl: imgurl,
+            }
+        }));
+        console.log("this is pic", pic);
     }
-    if(photos.data){
         return (
-            <Gallery table={photos.data.photos} handleClick={handleClick} />
+            <div>
+                { photos.data ? (<Gallery table={photos.data.photos} handleClick={handleClick} />) : (<b>Log in first</b>)}
+                { pic.data ? (<Picture image={pic.data.imgurl} />) : (<br></br>) }
+            </div>
         )    
-    } else {
-        return (
-            <b>Log in first!!</b>
-        )
-    }
 }

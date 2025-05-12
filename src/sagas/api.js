@@ -6,8 +6,9 @@ const wsurl = process.env.REACT_APP_WS;
 const loginurl = `${apiurl}/session`;
 const picsurl = `${apiurl}/photos`;
 
-const fetchWrap = async (url, method = 'GET', token = null, body = null) => {
+const fetchWrap = async (url, id, method = 'GET', token = null, body = null) => {
     const headers = { 'Content-Type': 'application/json' };
+    if (id) { url = `${url}/${id}` }
     if (token) { headers['Authorization'] = `Bearer ${token}`; }
     if (body) {
         return fetch(url, {
@@ -31,9 +32,9 @@ const checkJsonError = (response, json) => {
     }
 }
 
-const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
+const fetchRequest = async (url, id, method = 'GET', token = null, body = null) => {
     try {
-        const response = await fetchWrap(url, method, token, body);
+        const response = await fetchWrap(url, id, method, token, body);
         const json = await response.json();
         checkJsonError(response, json);
         return {
@@ -46,7 +47,7 @@ const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
 }
 
 export const fetchLogin = async (action, url = loginurl) => {
-    return fetchRequest(url, 'POST', null, JSON.stringify(action.data.body));
+    return fetchRequest(url, null, 'POST', null, JSON.stringify(action.data.body));
 }
 
 export const fetchConsumer = (token, url = wsurl) => {
@@ -54,13 +55,13 @@ export const fetchConsumer = (token, url = wsurl) => {
 }
 
 export const fetchRegenToken = async (action, url = loginurl) => {
-    return fetchRequest(url, 'PUT', action.data.token);
+    return fetchRequest(url, null, 'PUT', action.data.token);
 }
 
 export const fetchAllPictures = async (action, url = picsurl) => {
-    return fetchRequest(url, 'GET', action.data.token);
+    return fetchRequest(url, null, 'GET', action.data.token);
 }
 
 export const fetchViewPicture = async (action, url = picsurl) => {
-    return fetchRequest(url, 'PUT', action.data.token, action.data.body);
+    return fetchRequest(url, action.data.id, 'PUT', action.data.token, JSON.stringify(action.data.body));
 }
