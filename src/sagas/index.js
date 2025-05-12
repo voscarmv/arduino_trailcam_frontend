@@ -21,7 +21,7 @@ function* login(action) {
     try {
         const response = yield call(fetchLogin, { body: action.data });
         const token = response.data.token;
-        yield fork(handleWebSocketSubscription, token);
+        yield fork(actionCableSubscribe, token);
         yield call(regenToken, token); // Regenerate token for better security
     } catch (e) {
         yield put({ type: reducerTypes.LOGIN_ERROR, error: e.message });
@@ -100,7 +100,7 @@ const subscribe = (token) => {
     });
 }
 
-function* handleWebSocketSubscription(token) {
+function* actionCableSubscribe(token) {
     const channel = yield call(subscribe, token);
     try {
         while (true) {
