@@ -1,13 +1,17 @@
 import propTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 const Picture = ({ image }) => {
-    if(image){
-    return (
-        <img src={image} alt=""></img>
-    );
-} else {
-    return;
-}
+    if (image) {
+        return (
+            <div>
+                <Link to={image}>{image}</Link>
+                <img src={image} alt=""></img>
+            </div>
+        );
+    } else {
+        return;
+    }
 };
 
 Picture.propTypes = {

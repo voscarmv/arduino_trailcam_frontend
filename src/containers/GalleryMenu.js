@@ -18,6 +18,7 @@ export const GalleryMenu = () => {
         []
     );
     const handleClick = (key, imgurl, event) => {
+        console.log(imgurl);
         event.preventDefault();
         dispatch(picture({
             data: {

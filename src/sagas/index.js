@@ -69,6 +69,7 @@ function* gallery(action) {
 }
 
 function* picture(action) {
+    console.log(action);
     yield put({type: reducerTypes.PICTURE_LOADING});
     try{
         const response = yield call(fetchViewPicture, action);

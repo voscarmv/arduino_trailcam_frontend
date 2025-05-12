@@ -8,7 +8,7 @@ const Gallery = ({ table, handleClick }) => {
                 table.map(
                     item => (
                         <li key={item.key}>
-                            <Link to={`/`} onClick={(event) => handleClick(item.key, item.url, event)}>View</Link> {item.title}, Source: {item.source}, Created: {item.created_at}
+                            <Link to={`/`} onClick={(event) => handleClick(item.key, item.image_url, event)}>View</Link> {item.title}, Source: {item.source}, Created: {item.created_at}
                         </li>
                     )
                 )
