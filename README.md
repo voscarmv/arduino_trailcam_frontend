@@ -1,170 +1,156 @@
-# Arduino Trail Camera - API Backend
+# Arduino Trail Camera - Web Frontend
 
-This is the Ruby on Rails 8 API backend for the Arduino Trail Camera system. It handles user authentication, data management for photos, real-time communication, and media storage, serving as the core backend for its corresponding [React frontend](https://github.com/voscarmv/arduino_trailcam_frontend) and [Trailcam control subsystem](https://github.com/voscarmv/arduino_trailcam_cli).
+This project is a React-based web application serving as the frontend interface for the Arduino-powered Trail Camera System. It allows users to interact with the trail camera's data, primarily to view captured media and potentially manage configurations, by communicating with the [Arduino Trail Camera API Backend](https://github.com/voscarmv/arduino_trailcam_api).
 
 ## Overview
 
-The Arduino Trailcam API provides a robust and secure backend for managing an Arduino-based trail camera. It leverages Rails 8's built-in authentication system, Solid Cable/Cache/Queue for efficient real-time features and background processing, and Cloudinary for media storage. The API is designed to be deployed via Docker using Kamal.
+The Arduino Trailcam Frontend provides a user-friendly web interface to view and manage media captured by an Arduino trail camera. The physical camera setup, motion detection, and media capture are handled by the [Arduino Trail Camera CLI & Sensor Interface](https://github.com/voscarmv/arduino_trailcam_cli), which then uploads data to the [API Backend](https://github.com/voscarmv/arduino_trailcam_api). This frontend consumes that API to display information to the user.
 
-## Core Functionalities
+It leverages modern web technologies to deliver a responsive and interactive experience, utilizing Action Cable for potential real-time updates from the backend.
 
-*   **User Authentication:** Secure user registration, login, and session management using Rails 8's built-in authentication. Includes password reset functionality via email.
-*   **Role-Based Access Control:** Differentiates between `admin` and `user` roles, with admins having extended privileges for user management.
-*   **Project Management:** CRUD (Create, Read, Update, Delete) operations for "projects" (likely representing trail camera deployments or specific monitoring sessions).
-*   **Photo/Media Management:** Handles uploading, storing (via Cloudinary), and serving photos/media captured by the trail camera.
-*   **Real-time Communication:** Utilizes Action Cable (backed by Solid Cable) to potentially push real-time updates to connected frontend clients (e.g., new photo notifications, camera status).
-*   **Background Job Processing:** Employs Solid Queue for handling asynchronous tasks.
-*   **Caching:** Uses Solid Cache for improved performance.
-*   **CORS Enabled:** Configured with `rack-cors` to allow cross-origin requests from the frontend application.
+## Key Features
+
+*   **Media Gallery:** Displays images and potentially videos captured by the trail camera and served by the API.
+*   **Real-time Updates (Potentially):** Utilizes Action Cable (WebSockets) for real-time communication with the Rails backend, which could include:
+    *   Notifications for new media captures.
+    *   Live status updates if the backend supports relaying them.
+*   **Configuration Display/Management (Potentially):** May use React JSON Schema Form (`@rjsf`) to dynamically generate forms for viewing or updating trail camera settings managed by the API.
+*   **User Authentication Interface:** Provides login/registration forms to interact with the API's authentication system.
+*   **State Management:** Employs Redux and Redux Saga for robust and predictable application state management, handling asynchronous operations like fetching data from the API.
+*   **Client-Side Routing:** Using React Router for navigating between different sections of the application (e.g., gallery, settings, login).
+
+## System Architecture
+
+This frontend is one part of a larger system:
+
+1.  **[Arduino Trail Camera CLI & Sensor Interface](https://github.com/voscarmv/arduino_trailcam_cli):** (Assuming link based on CLI README's related repositories) The hardware (Arduino, PIR sensor, USB webcam) and local scripts (`listener.sh`, Node.js upload scripts) that detect motion, capture media using `ffmpeg`, and upload it to the API backend.
+2.  **[Arduino Trail Camera API Backend](https://github.com/voscarmv/arduino_trailcam_api):** A Ruby on Rails 8 application that handles user authentication, stores metadata about captures, manages media (likely via Cloudinary), and provides API endpoints for the frontend. It also supports Action Cable for real-time communication.
+3.  **Arduino Trail Camera Web Frontend (This Repository):** A React application that consumes the API backend to display data to the user and allow interaction.
 
 ## Tech Stack
 
-*   **Framework:** Ruby on Rails 8.0.2 (API-only mode)
-*   **Language:** Ruby 3.3.4
-*   **Web Server:** Puma (with Thruster for asset caching/compression)
-*   **Database:** SQLite3 (with Solid Cache, Solid Queue, and Solid Cable leveraging it for persistent storage)
-*   **Authentication:** Rails 8 built-in authentication, `bcrypt` for password hashing.
-*   **Media Storage:** Cloudinary
-*   **Real-time:** Action Cable (Solid Cable)
-*   **Background Jobs:** Solid Queue
-*   **Caching:** Solid Cache
-*   **Deployment:** Docker, Kamal
-*   **Development Tools:** Debug, Brakeman (security scanner), RuboCop (Rails Omakase style)
+*   **Framework:** React (bootstrapped with Create React App)
+*   **State Management:** Redux, Redux Toolkit, Redux Saga
+*   **Routing:** React Router DOM
+*   **Real-time Communication:** Action Cable (connecting to the Rails API backend)
+*   **Form Generation:** React JSON Schema Form (`@rjsf/core`, `@rjsf/validator-ajv8`)
+*   **API Communication:** Node Fetch
+*   **Testing:** Testing Library (Jest, React Testing Library, User Event)
+*   **Styling:** CSS
 
 ## Prerequisites
 
-*   Ruby 3.3.4 (as specified in `.ruby-version` and `Dockerfile`)
-*   Bundler (Ruby gem manager)
-*   SQLite3
-*   Node.js and Yarn (for JavaScript asset pipeline, if extended beyond API-only for admin interfaces, etc.)
-*   A Cloudinary account (for media storage)
-*   SMTP server credentials (for password reset emails)
+Before you begin, ensure you have the following installed:
+
+*   [Node.js](https://nodejs.org/) (LTS version recommended)
+*   [npm](https://www.npmjs.com/) (usually comes with Node.js)
+*   The [Arduino Trail Camera API Backend](https://github.com/voscarmv/arduino_trailcam_api) must be running and accessible.
+*   The [Arduino Trail Camera CLI & Sensor Interface](https://github.com/voscarmv/arduino_trailcam_cli) should be set up and actively capturing/uploading data if you wish to see live data.
 
 ## Getting Started
 
-To get a local copy of the API up and running, follow these steps:
+To get a local copy up and running, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/arduino_trailcam_api-main.git
-    cd arduino_trailcam_api-main
+    git clone https://github.com/your-username/arduino_trailcam_frontend-main.git
+    cd arduino_trailcam_frontend-main
     ```
 
-2.  **Install Ruby dependencies:**
+2.  **Install NPM packages:**
     ```bash
-    bundle install
+    npm install
     ```
 
-3.  **Set up Credentials:**
-    Rails uses encrypted credentials to store sensitive information.
-    *   **Master Key:** Ensure you have the `config/master.key` file. If not, and you are starting fresh, you can generate one (but if this is a shared project, obtain the key from the maintainer).
-    *   **Development Credentials:**
-        The application requires SMTP and Cloudinary credentials for development.
-        You can set these by editing the encrypted credentials file:
-        ```bash
-        EDITOR=nano rails credentials:edit --environment=development
-        ```
-        Use the structure from `config/credentials/development.example.yml` as a template:
-        ```yaml
-        smtp:
-          user_name: 'youremail@gmail.com'
-          password: 'your_app_password_or_smtp_password' # e.g., for Gmail App Passwords
-        cloudinary:
-          url: 'cloudinary://YOUR_API_KEY:YOUR_API_SECRET@YOUR_CLOUD_NAME'
-          key: 'YOUR_API_KEY'
-          secret: 'YOUR_API_SECRET'
-          name: 'YOUR_CLOUD_NAME'
-          folder: 'your_trailcam_folder_name' # Optional: organize uploads in Cloudinary
-        ```
-        Replace the placeholder values with your actual credentials.
-
-4.  **Prepare the Database:**
-    This command will create your database, load the schema, and run any pending migrations and seed data.
+3.  **Set up Environment Variables:**
+    This project uses a `.env.sh` file to manage environment variables. Create this file in the root of the project:
     ```bash
-    rails db:prepare
+    touch .env.sh
     ```
-    Alternatively, to run migrations and seed separately:
+    Then, populate it with the necessary environment variables. These will primarily be the URLs for your running backend API.
+    ```sh
+    #!/bin/sh
+    # .env.sh
+
+    # URL for your backend API (e.g., where the Rails app is running)
+    export REACT_APP_API_URL="http://localhost:3000" # Adjust if your API runs elsewhere
+
+    # URL for your Action Cable WebSocket server (part of the Rails API)
+    export REACT_APP_ACTION_CABLE_URL="ws://localhost:3000/cable" # Adjust if your API runs elsewhere
+
+    # Add any other environment variables required by the application
+    ```
+    Make the script executable:
     ```bash
-    rails db:migrate
-    rails db:seed # This will create a default admin user (admin@example.com / admin)
+    chmod +x .env.sh
     ```
+    *Note: The `npm start` script is configured to source this file.*
 
-5.  **Start the Rails server:**
+4.  **Run the application in development mode:**
     ```bash
-    rails server
+    npm start
     ```
-    The API will typically be available at `http://localhost:3000`.
+    This will run the app in development mode and automatically source the environment variables from `.env.sh`.
+    Open [http://localhost:3000](http://localhost:3000) (or the port specified by `react-scripts start` if different from the API) to view it in your browser. The page will reload when you make changes.
 
-## API Endpoints & Testing
+## Available Scripts
 
-The API provides standard RESTful endpoints for managing users, projects, and photos.
+In the project directory, you can run:
 
-*   **Authentication Endpoints:**
-    *   User Registration
-    *   Login (Session creation)
-    *   Logout (Session destruction)
-    *   Password Reset Request
-    *   Password Update
-*   **Project Endpoints:** CRUD operations for projects.
-*   **Photo Endpoints:** Likely involves creating (uploading) and listing photos.
+### `npm start`
 
-**For detailed API endpoint information and testing:**
+Runs the app in development mode after sourcing environment variables from `.env.sh`.
+Open [http://localhost:3000](http://localhost:3000) (or the configured port) to view it in your browser.
 
-*   **Postman Collection:** A Postman collection is available for testing the API: [Rails 8 Auth API Tester](https://team55-6229.postman.co/workspace/722dec53-df85-40a5-8244-4a7f428b1a8c/request/17376401-d068842a-992c-4626-9515-6a3ba888950a?action=share&source=copy-link&creator=17376401&ctx=documentation) (link from original README).
-*   **API Tester Script:** The original README also mentions using [Rails 8 Auth Tester2](https://github.com/voscarmv/rails_8_auth_tester2) for changing passwords and signing up new users via Node.js scripts.
+The page will reload when you make changes. Lint errors may also appear in the console.
 
-**Default Admin Credentials (after seeding):**
-*   Email: `admin@example.com`
-*   Password: `admin`
+### `npm test`
 
-## Real-time Features (Action Cable)
+Launches the test runner in interactive watch mode. See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-This API is set up with Solid Cable, allowing for real-time features to be implemented. The frontend can connect to `/cable` endpoint to subscribe to channels and receive live updates.
+### `npm run build`
 
-## Media Handling (Cloudinary)
+Builds the app for production to the `build` folder. It correctly bundles React in production mode and optimizes the build for the best performance. The build is minified, and filenames include hashes. Your app is ready to be deployed!
 
-Uploaded photos and other media are stored using Cloudinary. Ensure your Cloudinary credentials are correctly configured in `config/credentials/development.yml` (or the appropriate environment's credentials file) and `config/storage.yml` is set to use the `:cloudinary` service.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## Deployment
+### `npm run eject`
 
-### Render.com
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-The original README provided instructions for deploying on Render.com:
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project and copy all configuration files (webpack, Babel, ESLint, etc.) and transitive dependencies into your project, giving you full control.
 
-    Build Command: `bundle install;`
+## Backend Interaction
 
-    Start Command: `rails db:setup && bundle exec rails server -b 0.0.0.0 -e production`
+This frontend application is designed to communicate with the [Arduino Trail Camera API Backend](https://github.com/voscarmv/arduino_trailcam_api). The backend is responsible for:
 
-    Environment Variables:
+*   User authentication and authorization.
+*   Managing and serving data related to "projects" and captured media (photos/videos).
+*   Interfacing with Cloudinary for media storage.
+*   Broadcasting real-time updates via Action Cable (e.g., when new media is uploaded by the CLI component).
 
-        RAILS_MASTER_KEY: Set this to the content of your config/credentials/production.key (or config/master.key).
+Ensure the backend API server is running and configured correctly (including CORS settings) for the frontend to function as expected.
 
-        Add Cloudinary and SMTP credentials as environment variables. (optional)
+## Learn More
 
-## Development
-
-    Linting & Styling: Uses rubocop-rails-omakase for Ruby styling. Run bundle exec rubocop to check.
-
-    Security Scanning: Uses brakeman for static security analysis. Run bundle exec brakeman.
-
-    Database Migrations: Manage database schema changes with rails db:migrate.
-
-    Background Jobs: Solid Queue is used. You can start a job worker process with bin/jobs start.
+*   [Create React App Documentation](https://facebook.github.io/create-react-app/docs/getting-started)
+*   [React Documentation](https://reactjs.org/)
+*   [Redux Toolkit](https://redux-toolkit.js.org/)
+*   [Redux Saga](https://redux-saga.js.org/)
+*   [React Router](https://reactrouter.com/)
+*   [React JSON Schema Form](https://rjsf-team.github.io/react-jsonschema-form/)
+*   [Action Cable Client (JavaScript)](https://guides.rubyonrails.org/action_cable_overview.html#client-side-javascript)
 
 ## Contributing
 
-Contributions are welcome. Please adhere to the existing code style and ensure all tests pass.
+Contributions are welcome! Please follow the standard fork, branch, and pull request workflow. Ensure your code adheres to the existing linting rules and that all tests pass.
 
-    1. Fork the Project
-
-    2. Create your Feature Branch (git checkout -b feature/NewApiFeature)
-
-    3. Commit your Changes (git commit -m 'Add some NewApiFeature')
-
-    4. Push to the Branch (git push origin feature/NewApiFeature)
-
-    5. Open a Pull Request
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
 ## License
 
-Distributed under the MIT License. See LICENSE.txt (if present) or assume MIT as is common for Rails projects.
+This project is licensed under the MIT License, as is common for projects bootstrapped with Create React App. Please check for a `LICENSE` file or clarify with the maintainers if needed.
